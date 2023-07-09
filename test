@@ -1,0 +1,115 @@
+#ifndef __PROGTEST__
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <cstdint>
+#include <cassert>
+#include <cmath>
+using namespace std;
+#endif /* __PROGTEST__ */
+
+struct Block
+{
+  int size;
+  bool isFree;
+  Block *next;
+};
+
+const int blockSize = sizeof(Block);
+Block *freeListStart = nullptr;
+
+void HeapInit(void *memPool, int memSize)
+{
+  uintptr_t address = reinterpret_cast<uintptr_t>(memPool);
+  size_t alignment = alignof(double);
+  size_t offset = (alignment - (address % alignment)) % alignment;
+
+  freeListStart = reinterpret_cast<Block *>(address + offset);
+  freeListStart->size = memSize - blockSize - offset;
+  freeListStart->isFree = true;
+  freeListStart->next = nullptr;
+}
+
+void *HeapAlloc(int size)
+{
+  if (size <= 0)
+    return nullptr;
+
+  Block *current = freeListStart;
+
+  while (current != nullptr)
+  {
+    if (current->isFree && current->size >= size)
+    {
+      break;
+    }
+    current = current->next;
+  }
+
+  if (current != nullptr)
+  {
+    while (current->size >= (size + blockSize) * 2)
+    {
+      int newBlockSize = (current->size / 2) - blockSize;
+      Block *newBlock = reinterpret_cast<Block *>(reinterpret_cast<char *>(current) + blockSize + newBlockSize);
+      newBlock->size = newBlockSize;
+      newBlock->isFree = true;
+      newBlock->next = current->next;
+      current->next = newBlock;
+      current->size = newBlockSize;
+    }
+    current->isFree = false;
+    return reinterpret_cast<char *>(current) + blockSize;
+  }
+  return nullptr;
+}
+
+bool HeapFree(void *blk)
+{
+  Block *blockToFree = reinterpret_cast<Block *>(reinterpret_cast<char *>(blk) - blockSize);
+  Block *currentBlock = freeListStart;
+
+  // check if blockToFree is in the list
+  while (currentBlock != nullptr)
+  {
+    if (currentBlock == blockToFree)
+    {
+      break;
+    }
+    currentBlock = currentBlock->next;
+  }
+
+  if ((!blockToFree->isFree) && currentBlock == blockToFree && currentBlock != nullptr)
+  {
+    blockToFree->isFree = true;
+
+    while (blockToFree->next != nullptr && blockToFree->next->isFree)
+    {
+      blockToFree->size += blockToFree->next->size + blockSize;
+      blockToFree->next = blockToFree->next->next;
+    }
+    return true;
+  }
+  return false;
+}
+
+void HeapDone(int *pendingBlk)
+{
+  *pendingBlk = 0;
+  Block *current = freeListStart;
+  while (current != nullptr)
+  {
+    if (!current->isFree)
+    {
+      (*pendingBlk)++;
+    }
+    current = current->next;
+  }
+}
+
+#ifndef __PROGTEST__
+int main(void)
+{
+  return 0;
+}
+#endif /* PROGTEST */
