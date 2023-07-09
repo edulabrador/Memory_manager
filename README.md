@@ -1,6 +1,8 @@
 # Memory_manager
 This is a project for the CTU course on Operating Systems, written in C++.
+
 The practice statement is as follows:
+
 "This task is focused on the memory allocation problem that is done by the OS and the runtime of user programs. The problem is to implement a simplified version of a memory manager.
 
 We assume a program where the dynamic memory allocator does not exist (it is disabled in the testing Progtest environment). Thus, there is no malloc, free, ..., nor C++ operators new or delete. Your task is to implement variants of the functions.
