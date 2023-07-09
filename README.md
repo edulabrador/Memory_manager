@@ -1,7 +1,7 @@
 # Memory_manager
-#This is a project for the CTU course on Operating Systems, written in C++.
+This is a project for the CTU course on Operating Systems, written in C++.
 
-#The practice statement is as follows:
+The practice statement is as follows:
 
 "This task is focused on the memory allocation problem that is done by the OS and the runtime of user programs. The problem is to implement a simplified version of a memory manager.
 
